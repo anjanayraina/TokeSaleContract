@@ -24,11 +24,18 @@ contract MyTokenSale is Ownable {
     uint256 public constant PUBLICSALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT = 200 ether;
     uint256 totalContributions;
 
+    event PresaleStatusChanged(bool status);
+    event PublicSaleStatusChanged(bool status);
+    event TokensPurchased(address buyer, uint256 amount);
+    event TokensDistributed(address recipient, uint256 amount);
+    event RefundProcessed(address refunder, uint256 amount);
+
     error SaleNotActive();
     error PreSaleCapExcedded();
     error PostSaleCapExcedded();
     error PreSaleStillActive();
     error BalanceHigherThanMinimmum();
+
     mapping(address => uint256) public contributions;
 
     /**
@@ -42,18 +49,19 @@ contract MyTokenSale is Ownable {
 
     function changePreSaleStatus(bool status) external onlyOwner {
         isPreSaleActive = status;
-        isPublicSaleActive = !status;
+        emit PresaleStatusChanged(status);
     }
 
     function changePublicSaleStatus(bool status) external onlyOwner {
         isPublicSaleActive = status;
-        isPreSaleActive = !status;
+        emit PublicSaleStatusChanged(status);
     }
 
     /**
      * @dev Buys tokens in the presale or public sale.
      */
     function buyTokens() external payable {
+        address caller = msg.sender;
         if (!isPreSaleActive && !isPublicSaleActive) {
             revert SaleNotActive();
         }
@@ -61,7 +69,7 @@ contract MyTokenSale is Ownable {
             isPreSaleActive
                 && (
                     ((totalContributions + msg.value) > PRE_SALE_CAP)
-                        || ((contributions[msg.sender] + msg.value) > PRESALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT)
+                        || ((contributions[caller] + msg.value) > PRESALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT)
                 )
         ) {
             revert PreSaleCapExcedded();
@@ -71,15 +79,16 @@ contract MyTokenSale is Ownable {
             isPublicSaleActive
                 && (
                     ((totalContributions + msg.value) > PUBLIC_SALE_CAP)
-                        || ((contributions[msg.sender] + msg.value) > PUBLICSALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT)
+                        || ((contributions[caller] + msg.value) > PUBLICSALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT)
                 )
         ) {
             revert PostSaleCapExcedded();
         }
         uint256 tokensToBuy = _calculateTokens(msg.value);
-        contributions[msg.sender] += msg.value;
-        totalContributions+=msg.value;
-        token.safeTransfer(msg.sender, tokensToBuy);
+        contributions[caller] += msg.value;
+        totalContributions += msg.value;
+        token.safeTransfer(caller, tokensToBuy);
+        emit TokensPurchased(caller, tokensToBuy);
     }
 
     /**
@@ -100,33 +109,32 @@ contract MyTokenSale is Ownable {
      */
     function distributeTokens(address to, uint256 amount) external onlyOwner {
         token.safeTransfer(to, amount);
+        emit TokensDistributed(to, amount);
     }
 
-    function refund(uint256 amount ) external {
+    function refund(uint256 amount) external {
         address caller = msg.sender;
-        if(isPreSaleActive){
+        if (isPreSaleActive) {
             revert PreSaleStillActive();
-        }
-        else if(!isPublicSaleActive){
-            if(contributions[caller] < PUBLICSALE_MINIMUM_CONTRIBUTION_PER_PARTICIPANT){
+        } else if (!isPublicSaleActive) {
+            if (contributions[caller] < PUBLICSALE_MINIMUM_CONTRIBUTION_PER_PARTICIPANT) {
                 revert BalanceHigherThanMinimmum();
             }
             uint256 tokenAmount = _calculateTokens(amount);
-            token.safeTransferFrom( caller, address(this), tokenAmount);
-            contributions[caller]-=amount;
-            (bool success , ) = payable(caller).call{value : amount}("");
+            token.safeTransferFrom(caller, address(this), tokenAmount);
+            contributions[caller] -= amount;
+            (bool success,) = payable(caller).call{value: amount}("");
             require(success);
-        }
-
-        else{
-            if(contributions[caller] < PRESALE_MINIMUM_CONTRIBUTION_PER_PARTICIPANT){
+        } else {
+            if (contributions[caller] < PRESALE_MINIMUM_CONTRIBUTION_PER_PARTICIPANT) {
                 revert BalanceHigherThanMinimmum();
             }
             uint256 tokenAmount = _calculateTokens(amount);
-            token.safeTransferFrom( caller, address(this), tokenAmount);
-            contributions[caller]-=amount;
-            (bool success , ) = payable(caller).call{value : amount}("");
+            token.safeTransferFrom(caller, address(this), tokenAmount);
+            contributions[caller] -= amount;
+            (bool success,) = payable(caller).call{value: amount}("");
             require(success);
         }
+        emit RefundProcessed(caller, amount);
     }
 }
