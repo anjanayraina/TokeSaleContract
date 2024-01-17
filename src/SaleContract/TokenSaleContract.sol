@@ -3,6 +3,7 @@ pragma solidity 0.8.23;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /**
  * @title MyTokenSale
@@ -10,6 +11,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * @dev A contract for selling tokens in presale and public sale phases.
  */
 contract MyTokenSale is Ownable {
+    using SafeERC20 for IERC20;
     IERC20 public token;
     bool public isPreSaleActive;
     bool public isPublicSaleActive;
@@ -21,14 +23,15 @@ contract MyTokenSale is Ownable {
     uint256 public constant PUBLICSALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT = 200 ether;
 
     error SaleNotActive();
+    error PreSaleCapExcedded();
+    error PostSaleCapExcedded();
 
     mapping(address => uint256) public contributions;
 
     /**
-     * @dev Constructs a new token sale contract.
+     * @dev Sets the parameters for the token sale contract 
      * @param tokenAddress The address of the token contract.
      * @param initialOwner The address of the owner of the contract
-     *
      */
     constructor(IERC20 tokenAddress, address initialOwner) Ownable(initialOwner) {
         token = tokenAddress;
@@ -49,8 +52,16 @@ contract MyTokenSale is Ownable {
         if (!isPreSaleActive && !isPublicSaleActive) {
             revert SaleNotActive();
         }
+        if(isPreSaleActive && (((contributions[msg.sender] + msg.value) > PRE_SALE_CAP)  ||  ((contributions[msg.sender] + msg.value) > PRESALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT))){
+            revert PreSaleCapExcedded();
+        }
+
+        if(isPublicSaleActive && (((contributions[msg.sender] + msg.value) > PUBLIC_SALE_CAP)  ||  ((contributions[msg.sender] + msg.value) > PUBLICSALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT))){
+            revert PostSaleCapExcedded();
+        }
         uint256 tokensToBuy = _calculateTokens(msg.value);
         contributions[msg.sender] += msg.value;
+            token.safeTransfer(  msg.sender, tokensToBuy);
     }
 
     /**

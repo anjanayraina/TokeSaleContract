@@ -13,7 +13,7 @@ contract SupraOracleToken is ERC20, Ownable {
     constructor(address initialOwner) ERC20("SupraOracle Token", "SOT") Ownable(initialOwner) {}
 /**
     * @dev Mints a specific amount of tokens to a given account.
-    * @param account The account for which the tokens will be minted .
+    * @param to The account for which the tokens will be minted .
     * @param amount The amount of tokens to mint.
     */
     function mint(address to, uint256 amount) public onlyOwner {
