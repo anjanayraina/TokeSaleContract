@@ -12,6 +12,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
  */
 contract MyTokenSale is Ownable {
     using SafeERC20 for IERC20;
+
     IERC20 public token;
     bool public isPreSaleActive;
     bool public isPublicSaleActive;
@@ -21,6 +22,7 @@ contract MyTokenSale is Ownable {
     uint256 public constant PUBLICSALE_MINIMUM_CONTRIBUTION_PER_PARTICIPANT = 20 ether;
     uint256 public constant PRESALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT = 100 ether;
     uint256 public constant PUBLICSALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT = 200 ether;
+    uint256 totalContributions;
 
     error SaleNotActive();
     error PreSaleCapExcedded();
@@ -29,7 +31,7 @@ contract MyTokenSale is Ownable {
     mapping(address => uint256) public contributions;
 
     /**
-     * @dev Sets the parameters for the token sale contract 
+     * @dev Sets the parameters for the token sale contract
      * @param tokenAddress The address of the token contract.
      * @param initialOwner The address of the owner of the contract
      */
@@ -52,16 +54,29 @@ contract MyTokenSale is Ownable {
         if (!isPreSaleActive && !isPublicSaleActive) {
             revert SaleNotActive();
         }
-        if(isPreSaleActive && (((contributions[msg.sender] + msg.value) > PRE_SALE_CAP)  ||  ((contributions[msg.sender] + msg.value) > PRESALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT))){
+        if (
+            isPreSaleActive
+                && (
+                    ((totalContributions + msg.value) > PRE_SALE_CAP)
+                        || ((contributions[msg.sender] + msg.value) > PRESALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT)
+                )
+        ) {
             revert PreSaleCapExcedded();
         }
 
-        if(isPublicSaleActive && (((contributions[msg.sender] + msg.value) > PUBLIC_SALE_CAP)  ||  ((contributions[msg.sender] + msg.value) > PUBLICSALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT))){
+        if (
+            isPublicSaleActive
+                && (
+                    ((totalContributions + msg.value) > PUBLIC_SALE_CAP)
+                        || ((contributions[msg.sender] + msg.value) > PUBLICSALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT)
+                )
+        ) {
             revert PostSaleCapExcedded();
         }
         uint256 tokensToBuy = _calculateTokens(msg.value);
         contributions[msg.sender] += msg.value;
-            token.safeTransfer(  msg.sender, tokensToBuy);
+        totalContributions+=msg.value;
+        token.safeTransfer(msg.sender, tokensToBuy);
     }
 
     /**
