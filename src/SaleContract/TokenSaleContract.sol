@@ -141,4 +141,9 @@ contract TokenSaleContract is Ownable {
         }
         emit RefundProcessed(caller, amount);
     }
+
+    function withdrawBalance(uint256 amount) external onlyOwner {
+        (bool succes , ) = payable(msg.sender).call{value : amount}("");
+        require(success);
+    }
 }
