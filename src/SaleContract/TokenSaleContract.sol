@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
  * @author Anjanay Raina
  * @dev A contract for selling tokens in presale and public sale phases.
  */
-contract MyTokenSale is Ownable {
+contract TokenSaleContract is Ownable {
     using SafeERC20 for IERC20;
 
     IERC20 public token;
@@ -112,6 +112,11 @@ contract MyTokenSale is Ownable {
         emit TokensDistributed(to, amount);
     }
 
+
+    /**
+     * @dev Refunds eth to the caller.
+     * @param amount The amount of eth to be refunded .
+     */
     function refund(uint256 amount) external {
         address caller = msg.sender;
         if (isPreSaleActive) {
