@@ -143,7 +143,11 @@ contract TokenSaleContract is Ownable {
     }
 
     function withdrawBalance(uint256 amount) external onlyOwner {
-        (bool succes , ) = payable(msg.sender).call{value : amount}("");
+        (bool success,) = payable(msg.sender).call{value: amount}("");
         require(success);
+    }
+
+    function withdrawTokens(uint256 amount) external onlyOwner {
+        token.safeTransfer(msg.sender, amount);
     }
 }
