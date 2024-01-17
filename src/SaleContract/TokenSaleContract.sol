@@ -28,6 +28,7 @@ contract MyTokenSale is Ownable {
     error PreSaleCapExcedded();
     error PostSaleCapExcedded();
     error PreSaleStillActive();
+    error BalanceHigherThanMinimmum();
     mapping(address => uint256) public contributions;
 
     /**
@@ -111,9 +112,10 @@ contract MyTokenSale is Ownable {
                 revert BalanceHigherThanMinimmum();
             }
             uint256 tokenAmount = _calculateTokens(amount);
-            token.burnFrom(caller , tokenAmount);
+            token.safeTransferFrom( caller, address(this), tokenAmount);
             contributions[caller]-=amount;
             (bool success , ) = payable(caller).call{value : amount}("");
+            require(success);
         }
 
         else{
@@ -121,9 +123,10 @@ contract MyTokenSale is Ownable {
                 revert BalanceHigherThanMinimmum();
             }
             uint256 tokenAmount = _calculateTokens(amount);
-            token.burnFrom(caller , tokenAmount);
+            token.safeTransferFrom( caller, address(this), tokenAmount);
             contributions[caller]-=amount;
             (bool success , ) = payable(caller).call{value : amount}("");
+            require(success);
         }
     }
 }
