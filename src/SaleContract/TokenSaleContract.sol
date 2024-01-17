@@ -112,7 +112,6 @@ contract TokenSaleContract is Ownable {
         emit TokensDistributed(to, amount);
     }
 
-
     /**
      * @dev Refunds eth to the caller.
      * @param amount The amount of eth to be refunded .
