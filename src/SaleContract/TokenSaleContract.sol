@@ -26,9 +26,9 @@ contract TokenSaleContract is Ownable {
 
     event PresaleStatusChanged(bool status);
     event PublicSaleStatusChanged(bool status);
-    event TokensPurchased(address buyer, uint256 amount);
-    event TokensDistributed(address recipient, uint256 amount);
-    event RefundProcessed(address refunder, uint256 amount);
+    event TokensPurchased(address indexed buyer, uint256 amount);
+    event TokensDistributed(address indexed recipient, uint256 amount);
+    event RefundProcessed(address indexed refunder, uint256 amount);
 
     error SaleNotActive();
     error PreSaleCapExcedded();
