@@ -27,7 +27,7 @@ contract MyTokenSale is Ownable {
     error SaleNotActive();
     error PreSaleCapExcedded();
     error PostSaleCapExcedded();
-
+    error PreSaleStillActive();
     mapping(address => uint256) public contributions;
 
     /**
@@ -41,10 +41,12 @@ contract MyTokenSale is Ownable {
 
     function changePreSaleStatus(bool status) external onlyOwner {
         isPreSaleActive = status;
+        isPublicSaleActive = !status;
     }
 
     function changePublicSaleStatus(bool status) external onlyOwner {
         isPublicSaleActive = status;
+        isPreSaleActive = !status;
     }
 
     /**
@@ -92,10 +94,36 @@ contract MyTokenSale is Ownable {
 
     /**
      * @dev Distributes tokens to a specified address.
-     * @param beneficiary The address to distribute tokens to.
+     * @param to The address to distribute tokens to.
      * @param amount The number of tokens to distribute.
      */
-    function distributeTokens(address beneficiary, uint256 amount) external onlyOwner {
-        token.transfer(beneficiary, amount);
+    function distributeTokens(address to, uint256 amount) external onlyOwner {
+        token.safeTransfer(to, amount);
+    }
+
+    function refund(uint256 amount ) external {
+        address caller = msg.sender;
+        if(isPreSaleActive){
+            revert PreSaleStillActive();
+        }
+        else if(!isPublicSaleActive){
+            if(contributions[caller] < PUBLICSALE_MINIMUM_CONTRIBUTION_PER_PARTICIPANT){
+                revert BalanceHigherThanMinimmum();
+            }
+            uint256 tokenAmount = _calculateTokens(amount);
+            token.burnFrom(caller , tokenAmount);
+            contributions[caller]-=amount;
+            (bool success , ) = payable(caller).call{value : amount}("");
+        }
+
+        else{
+            if(contributions[caller] < PRESALE_MINIMUM_CONTRIBUTION_PER_PARTICIPANT){
+                revert BalanceHigherThanMinimmum();
+            }
+            uint256 tokenAmount = _calculateTokens(amount);
+            token.burnFrom(caller , tokenAmount);
+            contributions[caller]-=amount;
+            (bool success , ) = payable(caller).call{value : amount}("");
+        }
     }
 }
