@@ -8,8 +8,8 @@ The contract is associated with an ERC20 token, which is specified at the time o
 ## Sale Phases
 There are two distinct sale phases:
 
-1. **Pre-Sale**: A phase where tokens can be purchased up to a certain cap (PRE_SALE_CAP) with minimum and maximum contribution limits per participant (PRESALE_MINIMUM_CONTRIBUTION_PER_PARTICIPANT and PRESALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT).
-2. **Public Sale**: A phase with a higher cap (PUBLIC_SALE_CAP) and different minimum and maximum contribution limits per participant (PUBLICSALE_MINIMUM_CONTRIBUTION_PER_PARTICIPANT and PUBLICSALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT).
+1. **Pre-Sale**: A phase where tokens can be purchased up to a certain cap `PRE_SALE_CAP` with minimum and maximum contribution limits per participant `PRESALE_MINIMUM_CONTRIBUTION_PER_PARTICIPANT` and `PRESALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT`.
+2. **Public Sale**: A phase with a higher cap `PUBLIC_SALE_CAP` and different minimum and maximum contribution limits per participant `PUBLICSALE_MINIMUM_CONTRIBUTION_PER_PARTICIPANT` and `PUBLICSALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT`.
 3. **Sale Activation**: The contract owner can activate or deactivate each sale phase using `changePreSaleStatus` and `changePublicSaleStatus` functions.
 
 ## Token Purchase
