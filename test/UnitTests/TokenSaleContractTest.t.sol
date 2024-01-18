@@ -10,6 +10,9 @@ contract TokenSaleContractTest is Test {
     TokenSaleContract public tokenSale;
     SupraOracleToken public token;
 
+    error SaleNotActive();
+    error PreSaleCapExcedded();
+
     function setUp() public {
         token = new SupraOracleToken(address(this));
         tokenSale = new TokenSaleContract(IERC20(token), address(this));
@@ -42,7 +45,7 @@ contract TokenSaleContractTest is Test {
         assertFalse(tokenSale.isPublicSaleActive());
     }
 
-    function testBuyTokens() public {
+    function test_BuyTokens() public {
         vm.startPrank(address(this));
         tokenSale.changePreSaleStatus(true);
         vm.stopPrank();
@@ -52,6 +55,28 @@ contract TokenSaleContractTest is Test {
         assertTrue(tokenSale.isPreSaleActive());
         assertEq(tokenSale.contributions(address(0x123)), 10 ether);
         assertEq(token.balanceOf(address(0x123)), 100 ether);
+        vm.stopPrank();
+    }
+
+    function test_BuyTokensSaleInactive() public {
+        vm.startPrank(address(this));
+        vm.stopPrank();
+        vm.deal(address(0x123), 20 ether);
+        vm.startPrank(address(0x123));
+        vm.expectRevert(SaleNotActive.selector);
+        tokenSale.buyTokens{value: 10 ether}();
+        vm.stopPrank();
+    }
+
+    function test_BuyTokensPreSaleCapExcedded() public {
+        vm.startPrank(address(this));
+        tokenSale.changePreSaleStatus(true);
+        vm.stopPrank();
+        vm.deal(address(0x123), 20 ether);
+        vm.startPrank(address(0x123));
+        vm.deal(address(0x123), 200 ether);
+        vm.expectRevert(PreSaleCapExcedded.selector);
+        tokenSale.buyTokens{value: 101 ether}();
         vm.stopPrank();
     }
 
