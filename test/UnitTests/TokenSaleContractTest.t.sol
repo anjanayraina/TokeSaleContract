@@ -207,6 +207,28 @@ contract TokenSaleContractTest is Test {
         vm.stopPrank();
     }
 
+    function test_RefundPublicSaleActive3() public {
+        vm.startPrank(address(this));
+        tokenSale.changePreSaleStatus(true);
+        vm.deal(address(0x123), 200 ether);
+        token.mint(address(tokenSale), 1000 * (10 ** token.decimals()));
+        token.mint(address(0x123), 300 ether);
+        vm.stopPrank();
+        vm.startPrank(address(0x123));
+        tokenSale.buyTokens{value: 100 wei}();
+        vm.stopPrank();
+        vm.startPrank(address(this));
+        tokenSale.changePreSaleStatus(false);
+        tokenSale.changePublicSaleStatus(true);
+        vm.stopPrank();
+        vm.startPrank(address(0x123));
+        token.approve(address(tokenSale), 300 ether);
+        uint256 balanceBefore = address(0x123).balance;
+        tokenSale.refund(0 wei);
+        assertEq(address(0x123).balance, balanceBefore + 0 wei);
+        vm.stopPrank();
+    }
+
     function test_WithdrawBalance() public {
         vm.startPrank(address(this));
         vm.deal(address(tokenSale), 100 ether);

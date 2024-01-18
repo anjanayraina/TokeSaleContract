@@ -88,4 +88,18 @@ contract TokenSaleContractTest is Test {
         assertEq(token.balanceOf(to), amount);
         vm.stopPrank();
     }
+
+    function test_WithdrawBalance(uint256 amount) public {
+        vm.assume(amount != 0);
+        vm.assume(amount < type(uint128).max);
+        vm.startPrank(address(this));
+        vm.deal(address(tokenSale), amount);
+        uint256 balanceBefore = address(this).balance;
+        tokenSale.withdrawBalance(address(tokenSale).balance);
+        assertEq(address(tokenSale).balance, 0);
+        assertEq(address(this).balance, balanceBefore + amount);
+        vm.stopPrank();
+    }
+
+    receive() external payable {}
 }
