@@ -2,8 +2,8 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
-import {TokenSaleContract} from "../src/SaleContract/TokenSaleContract.sol";
-import {SupraOracleToken} from "../src/Token/SupraOracleToken.sol";
+import {TokenSaleContract} from "../../src/SaleContract/TokenSaleContract.sol";
+import {SupraOracleToken} from "../../src/Token/SupraOracleToken.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract TokenSaleContractTest is Test {

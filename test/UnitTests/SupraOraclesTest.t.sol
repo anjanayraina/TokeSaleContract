@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Test, console2} from "forge-std/Test.sol";
-import {SupraOracleToken} from "../src/Token/SupraOracleToken.sol";
+import {SupraOracleToken} from "../../src/Token/SupraOracleToken.sol";
 
 contract SupraOraclesTokenTest is Test {
     SupraOracleToken public contractAddress;

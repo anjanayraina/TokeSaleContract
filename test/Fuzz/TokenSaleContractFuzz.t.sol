@@ -64,9 +64,9 @@ contract TokenSaleContractTest is Test {
 
     function test_PublicSaleBuyTokens(uint256 amount) public {
         vm.assume(amount < 200 ether);
-
         vm.startPrank(address(this));
         tokenSale.changePublicSaleStatus(true);
+        token.mint(address(tokenSale), amount * (10 ** token.decimals()));
         vm.stopPrank();
         vm.deal(address(0x123), amount);
         vm.startPrank(address(0x123));
