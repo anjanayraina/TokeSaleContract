@@ -60,7 +60,45 @@ forge install
 
 3. **Run the Tests**
 
+
+
 ``` 
 forge test
 ```
 
+# Design Choices
+
+The `TokenSaleContract` design reflects several choices aimed at creating a structured and manageable token sale event. Here's a brief explanation of the key design choices:
+
+## Separate Sale Phases
+The contract distinguishes between pre-sale and public sale phases to cater to different groups of investors. Pre-sales often offer better terms to early backers or smaller investors, while public sales are open to a wider audience.
+
+## Fixed Caps and Contribution Limits
+The contract enforces hard caps on the total amount that can be raised (`PRE_SALE_CAP` and `PUBLIC_SALE_CAP`) and sets minimum and maximum contribution limits per participant for each phase. These limits help prevent individual investors from dominating the sale and ensure wider distribution of tokens.
+
+## Owner-Controlled Sale Activation
+The ability for the contract owner to toggle the sale phases on and off provides control over the timing of the sale and the ability to pause or end a sale phase in response to external factors.
+
+## Contribution Tracking
+Contributions are tracked per address to enforce individual contribution limits and to facilitate refunds if necessary.
+
+## Simplified Token Pricing
+The `_calculateTokens` function uses a fixed exchange rate for simplicity. In a real-world scenario, this could be replaced with a more complex pricing mechanism that accounts for dynamic pricing, bonuses, or tiered discounts.
+
+## Token Distribution
+The `distributeTokens` function allows the owner to distribute tokens outside of the sale mechanism, which can be used for airdrops, rewards, or compensating team members and advisors.
+
+## Refund Mechanism
+The `refund` function allows participants to get their ETH back if certain conditions are met. This provides a level of protection for participants and can be a trust-building feature.
+
+## Use of SafeERC20
+The contract uses OpenZeppelin's SafeERC20 library to safely interact with the ERC20 token contract, protecting against reentrancy and other token-related vulnerabilities.
+
+## Custom Errors
+The use of custom errors instead of traditional `require` statements with string messages saves gas and provides clearer error handling.
+
+## Event Emission
+Events are emitted for key actions, providing transparency and enabling off-chain services to monitor and react to contract activity.
+
+## Inheritance from Ownable
+The contract inherits from OpenZeppelin's `Ownable` to leverage a well-tested implementation of ownership and access control.
