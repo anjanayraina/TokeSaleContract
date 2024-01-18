@@ -107,10 +107,10 @@ contract TokenSaleContractTest is Test {
         vm.deal(address(0x123), 20 ether);
         vm.stopPrank();
         vm.startPrank(address(0x123));
-        tokenSale.buyTokens{value: 15 ether}();
+        tokenSale.buyTokens{value: 5 ether}();
         assertTrue(tokenSale.isPreSaleActive());
-        assertEq(tokenSale.contributions(address(0x123)), 15 ether);
-        assertEq(token.balanceOf(address(0x123)), 150 ether);
+        assertEq(tokenSale.contributions(address(0x123)), 5 ether);
+        assertEq(token.balanceOf(address(0x123)), 50 ether);
         vm.stopPrank();
         vm.startPrank(address(this));
         tokenSale.changePreSaleStatus(false);
@@ -118,7 +118,7 @@ contract TokenSaleContractTest is Test {
         vm.stopPrank();
         vm.startPrank(address(0x123));
         token.approve(address(tokenSale), 150 ether);
-        tokenSale.refund(15 ether);
+        tokenSale.refund(5 ether);
         assertEq(tokenSale.contributions(address(0x123)), 0);
         assertEq(token.balanceOf(address(0x123)), 0);
         vm.stopPrank();
@@ -179,7 +179,31 @@ contract TokenSaleContractTest is Test {
         vm.stopPrank();
         vm.startPrank(address(0x123));
         token.approve(address(tokenSale), 300 ether);
+        uint256 balanceBefore = address(0x123).balance;
+        vm.expectRevert(BalanceHigherThanMinimmum.selector);
         tokenSale.refund(30 ether);
+        vm.stopPrank();
+    }
+
+    function test_RefundPublicSaleActive2() public {
+        vm.startPrank(address(this));
+        tokenSale.changePreSaleStatus(true);
+        vm.deal(address(0x123), 200 ether);
+        token.mint(address(tokenSale), 1000 * (10 ** token.decimals()));
+        token.mint(address(0x123), 300 ether);
+        vm.stopPrank();
+        vm.startPrank(address(0x123));
+        tokenSale.buyTokens{value: 100 wei}();
+        vm.stopPrank();
+        vm.startPrank(address(this));
+        tokenSale.changePreSaleStatus(false);
+        tokenSale.changePublicSaleStatus(true);
+        vm.stopPrank();
+        vm.startPrank(address(0x123));
+        token.approve(address(tokenSale), 300 ether);
+        uint256 balanceBefore = address(0x123).balance;
+        tokenSale.refund(10 wei);
+        assertEq(address(0x123).balance, balanceBefore + 10 wei);
         vm.stopPrank();
     }
 

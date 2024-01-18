@@ -134,7 +134,7 @@ contract TokenSaleContract is Ownable, ReentrancyGuard {
             (bool success,) = payable(caller).call{value: amount}("");
             require(success);
         } else {
-            if (contributions[caller] < PRESALE_MINIMUM_CONTRIBUTION_PER_PARTICIPANT) {
+            if (contributions[caller] > PRESALE_MINIMUM_CONTRIBUTION_PER_PARTICIPANT) {
                 revert BalanceHigherThanMinimmum();
             }
             uint256 tokenAmount = _calculateTokens(amount);
