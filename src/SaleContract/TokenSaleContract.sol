@@ -144,13 +144,14 @@ contract TokenSaleContract is Ownable {
     /**
      * @dev Withdraws the eth balance of the contract .
      */
+
     function withdrawBalance(uint256 amount) external onlyOwner {
         (bool success,) = payable(msg.sender).call{value: amount}("");
         require(success);
     }
 
     /**
-     * @dev Withdraws the token balance of the contract 
+     * @dev Withdraws the token balance of the contract
      */
     function withdrawTokens(uint256 amount) external onlyOwner {
         token.safeTransfer(msg.sender, amount);

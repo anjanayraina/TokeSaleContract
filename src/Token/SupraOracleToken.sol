@@ -20,13 +20,4 @@ contract SupraOracleToken is ERC20, Ownable {
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
     }
-
-    /**
-     * @dev Burns a specific amount of tokens from a given account.
-     * @param account The account whose tokens will be burnt.
-     * @param amount The amount of tokens to burn.
-     */
-    function burnFrom(address account, uint256 amount) public onlyOwner {
-        _burn(account, amount);
-    }
 }
