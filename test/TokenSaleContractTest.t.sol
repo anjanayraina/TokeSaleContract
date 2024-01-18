@@ -125,5 +125,5 @@ contract TokenSaleContractTest is Test {
         vm.stopPrank();
     }
 
-    fallback() external payable {}
+    receive() external payable {}
 }

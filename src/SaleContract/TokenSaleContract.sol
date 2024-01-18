@@ -47,10 +47,20 @@ contract TokenSaleContract is Ownable {
         token = tokenAddress;
     }
 
+    // External functions
+
+    /**
+     * @dev Changes the status of the presale
+     * @param status The new status of the presale
+     */
     function changePreSaleStatus(bool status) external onlyOwner {
         isPreSaleActive = status;
         emit PresaleStatusChanged(status);
     }
+    /**
+     * @dev Changes the status of the public sale
+     * @param status The new status of the public sale
+     */
 
     function changePublicSaleStatus(bool status) external onlyOwner {
         isPublicSaleActive = status;
@@ -89,17 +99,6 @@ contract TokenSaleContract is Ownable {
         totalContributions += msg.value;
         token.safeTransfer(caller, tokensToBuy);
         emit TokensPurchased(caller, tokensToBuy);
-    }
-
-    /**
-     * @dev Calculates the number of tokens to buy based on the contributed Ether.
-     * @param ethAmount The amount of Ether contributed.
-     * @return The number of tokens to buy.
-     */
-    function _calculateTokens(uint256 ethAmount) internal pure returns (uint256) {
-        // Implement your token price calculation logic here
-        // For simplicity, we'll assume that 1 ETH = 10 token
-        return 10 * ethAmount;
     }
 
     /**
@@ -142,7 +141,8 @@ contract TokenSaleContract is Ownable {
         emit RefundProcessed(caller, amount);
     }
     /**
-     * @dev Withdraws the eth balance of the contract .
+     * @dev Withdraws the eth balance of the contract
+     * @param amount The amount of eth to withdraw
      */
 
     function withdrawBalance(uint256 amount) external onlyOwner {
@@ -152,8 +152,22 @@ contract TokenSaleContract is Ownable {
 
     /**
      * @dev Withdraws the token balance of the contract
+     * @param amount The amount of tokens to withdraw
      */
     function withdrawTokens(uint256 amount) external onlyOwner {
         token.safeTransfer(msg.sender, amount);
+    }
+
+    // Internal functions
+    /**
+     * @dev Calculates the number of tokens to buy based on the contributed Ether.
+     * @param ethAmount The amount of Ether contributed.
+     * @return The number of tokens to buy.
+     */
+
+    function _calculateTokens(uint256 ethAmount) internal pure returns (uint256) {
+        // Implement your token price calculation logic here
+        // For simplicity, we'll assume that 1 ETH = 10 token
+        return 10 * ethAmount;
     }
 }
