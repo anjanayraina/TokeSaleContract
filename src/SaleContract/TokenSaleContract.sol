@@ -4,13 +4,14 @@ pragma solidity 0.8.23;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 /**
  * @title MyTokenSale
  * @author Anjanay Raina
  * @dev A contract for selling tokens in presale and public sale phases.
  */
-contract TokenSaleContract is Ownable {
+
+contract TokenSaleContract is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     IERC20 public token;
@@ -70,7 +71,7 @@ contract TokenSaleContract is Ownable {
     /**
      * @dev Buys tokens in the presale or public sale.
      */
-    function buyTokens() external payable {
+    function buyTokens() external payable nonReentrant {
         address caller = msg.sender;
         if (!isPreSaleActive && !isPublicSaleActive) {
             revert SaleNotActive();
@@ -115,7 +116,7 @@ contract TokenSaleContract is Ownable {
      * @dev Refunds eth to the caller.
      * @param amount The amount of eth to be refunded .
      */
-    function refund(uint256 amount) external {
+    function refund(uint256 amount) external nonReentrant {
         address caller = msg.sender;
         if (isPreSaleActive) {
             revert PreSaleStillActive();
