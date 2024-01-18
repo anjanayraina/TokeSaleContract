@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "forge-std/Test.sol";
-import {TokenSaleContract} from "../src/SaleContract/TokenSaleContract.sol";
-import {SupraOracleToken} from "../src/Token/SupraOracleToken.sol";
+import {Test, console2} from "forge-std/Test.sol";
+import {TokenSaleContract} from "../../src/SaleContract/TokenSaleContract.sol";
+import {SupraOracleToken} from "../../src/Token/SupraOracleToken.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract TokenSaleContractTest is Test {
@@ -22,17 +22,21 @@ contract TokenSaleContractTest is Test {
         assertFalse(tokenSale.isPublicSaleActive());
     }
 
-    function testChangePreSaleStatus() public {
+    function testFail_ChangePreSaleStatus(address callerAddress) public {
+        vm.assume(callerAddress != address(this));
+        vm.startPrank(callerAddress);
         tokenSale.changePreSaleStatus(true);
         assertTrue(tokenSale.isPreSaleActive());
         assertFalse(tokenSale.isPublicSaleActive());
-
         tokenSale.changePreSaleStatus(false);
         assertFalse(tokenSale.isPreSaleActive());
         assertFalse(tokenSale.isPublicSaleActive());
+        vm.stopPrank();
     }
 
-    function testChangePublicSaleStatus() public {
+    function testFail_ChangePublicSaleStatus(address callerAddress) public {
+        vm.assume(callerAddress != address(this));
+        vm.startPrank(callerAddress);
         tokenSale.changePublicSaleStatus(true);
         assertFalse(tokenSale.isPreSaleActive());
         assertTrue(tokenSale.isPublicSaleActive());
@@ -40,6 +44,7 @@ contract TokenSaleContractTest is Test {
         tokenSale.changePublicSaleStatus(false);
         assertFalse(tokenSale.isPreSaleActive());
         assertFalse(tokenSale.isPublicSaleActive());
+        vm.stopPrank();
     }
 
     function testBuyTokens() public {
@@ -55,10 +60,14 @@ contract TokenSaleContractTest is Test {
         vm.stopPrank();
     }
 
-    function testDistributeTokens() public {
+    function testDistributeTokens(uint256 amount, address to) public {
+        vm.assume(to != address(0));
+        vm.assume(amount != 0);
+        vm.assume(amount < type(uint128).max);
         vm.startPrank(address(this));
-        tokenSale.distributeTokens(address(this), 100 * (10 ** token.decimals()));
-        assertEq(token.balanceOf(address(this)), 100 * (10 ** token.decimals()));
+        token.mint(address(tokenSale), amount);
+        tokenSale.distributeTokens(to, amount);
+        assertEq(token.balanceOf(to), amount);
         vm.stopPrank();
     }
 
@@ -84,46 +93,4 @@ contract TokenSaleContractTest is Test {
         assertEq(token.balanceOf(address(0x123)), 0);
         vm.stopPrank();
     }
-
-    function testFail_RefundPreSaleStillActive() public {
-        vm.startPrank(address(this));
-        tokenSale.changePreSaleStatus(true);
-        vm.deal(address(0x123), 20 ether);
-        vm.stopPrank();
-        vm.startPrank(address(0x123));
-        tokenSale.buyTokens{value: 15 ether}();
-        assertTrue(tokenSale.isPreSaleActive());
-        assertEq(tokenSale.contributions(address(0x123)), 15 ether);
-        assertEq(token.balanceOf(address(0x123)), 150 ether);
-        vm.stopPrank();
-        vm.startPrank(address(this));
-        vm.stopPrank();
-        vm.startPrank(address(0x123));
-        token.approve(address(tokenSale), 150 ether);
-        tokenSale.refund(15 ether);
-        assertEq(tokenSale.contributions(address(0x123)), 0);
-        assertEq(token.balanceOf(address(0x123)), 0);
-        vm.stopPrank();
-    }
-
-    function test_WithdrawBalance() public {
-        vm.startPrank(address(this));
-        vm.deal(address(tokenSale), 100 ether);
-        uint256 balanceBefore = address(this).balance;
-        tokenSale.withdrawBalance(address(tokenSale).balance);
-        assertEq(address(tokenSale).balance, 0);
-        assertEq(address(this).balance, balanceBefore + 100 ether);
-        vm.stopPrank();
-    }
-
-    function test_WithdrawTokenBalance() public {
-        vm.startPrank(address(this));
-        uint256 balanceBefore = token.balanceOf(address(this));
-        tokenSale.withdrawTokens(token.balanceOf(address(tokenSale)));
-        assertEq(token.balanceOf(address(tokenSale)), 0);
-        assertGt(token.balanceOf(address(this)), balanceBefore);
-        vm.stopPrank();
-    }
-
-    fallback() external payable {}
 }
