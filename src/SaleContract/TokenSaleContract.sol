@@ -36,6 +36,7 @@ contract TokenSaleContract is Ownable, ReentrancyGuard {
     error PostSaleCapExcedded();
     error PreSaleStillActive();
     error BalanceHigherThanMinimmum();
+    error NotEnoughBalance();
 
     mapping(address => uint256) public contributions;
 
@@ -118,10 +119,13 @@ contract TokenSaleContract is Ownable, ReentrancyGuard {
      */
     function refund(uint256 amount) external nonReentrant {
         address caller = msg.sender;
+        if (contributions[caller] < amount) {
+            revert NotEnoughBalance();
+        }
         if (isPreSaleActive) {
             revert PreSaleStillActive();
         } else if (!isPublicSaleActive) {
-            if (contributions[caller] < PUBLICSALE_MINIMUM_CONTRIBUTION_PER_PARTICIPANT) {
+            if (contributions[caller] > PUBLICSALE_MINIMUM_CONTRIBUTION_PER_PARTICIPANT) {
                 revert BalanceHigherThanMinimmum();
             }
             uint256 tokenAmount = _calculateTokens(amount);

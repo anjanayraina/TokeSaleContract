@@ -12,6 +12,9 @@ contract TokenSaleContractTest is Test {
 
     error SaleNotActive();
     error PreSaleCapExcedded();
+    error PostSaleCapExcedded();
+    error PreSaleStillActive();
+    error BalanceHigherThanMinimmum();
 
     function setUp() public {
         token = new SupraOracleToken(address(this));
@@ -80,14 +83,25 @@ contract TokenSaleContractTest is Test {
         vm.stopPrank();
     }
 
-    function testDistributeTokens() public {
+    function test_BuyTokensPublicSaleCapExcedded() public {
+        vm.startPrank(address(this));
+        tokenSale.changePublicSaleStatus(true);
+        vm.stopPrank();
+        vm.startPrank(address(0x123));
+        vm.deal(address(0x123), 300 ether);
+        vm.expectRevert(PostSaleCapExcedded.selector);
+        tokenSale.buyTokens{value: 201 ether}();
+        vm.stopPrank();
+    }
+
+    function test_DistributeTokens() public {
         vm.startPrank(address(this));
         tokenSale.distributeTokens(address(this), 100 * (10 ** token.decimals()));
         assertEq(token.balanceOf(address(this)), 100 * (10 ** token.decimals()));
         vm.stopPrank();
     }
 
-    function testRefund() public {
+    function test_RefundPreSaleActive() public {
         vm.startPrank(address(this));
         tokenSale.changePreSaleStatus(true);
         vm.deal(address(0x123), 20 ether);
@@ -110,7 +124,7 @@ contract TokenSaleContractTest is Test {
         vm.stopPrank();
     }
 
-    function testFail_RefundPreSaleStillActive() public {
+    function test_RefundPreSaleStillActive() public {
         vm.startPrank(address(this));
         tokenSale.changePreSaleStatus(true);
         vm.deal(address(0x123), 20 ether);
@@ -125,9 +139,47 @@ contract TokenSaleContractTest is Test {
         vm.stopPrank();
         vm.startPrank(address(0x123));
         token.approve(address(tokenSale), 150 ether);
+        vm.expectRevert(PreSaleStillActive.selector);
         tokenSale.refund(15 ether);
-        assertEq(tokenSale.contributions(address(0x123)), 0);
-        assertEq(token.balanceOf(address(0x123)), 0);
+        vm.stopPrank();
+    }
+
+    function test_RefundPublicSaleInActiveBalanceHigher() public {
+        vm.startPrank(address(this));
+        tokenSale.changePreSaleStatus(true);
+        vm.deal(address(0x123), 200 ether);
+        token.mint(address(0x123), 300 ether);
+        vm.stopPrank();
+        vm.startPrank(address(0x123));
+        tokenSale.buyTokens{value: 30 ether}();
+        vm.stopPrank();
+        vm.startPrank(address(this));
+        tokenSale.changePreSaleStatus(false);
+        vm.stopPrank();
+        vm.startPrank(address(0x123));
+        token.approve(address(tokenSale), 300 ether);
+        vm.expectRevert(BalanceHigherThanMinimmum.selector);
+        tokenSale.refund(30 ether);
+        vm.stopPrank();
+    }
+
+    function test_RefundPublicSaleActive() public {
+        vm.startPrank(address(this));
+        tokenSale.changePreSaleStatus(true);
+        vm.deal(address(0x123), 200 ether);
+        token.mint(address(tokenSale), 1000 * (10 ** token.decimals()));
+        token.mint(address(0x123), 300 ether);
+        vm.stopPrank();
+        vm.startPrank(address(0x123));
+        tokenSale.buyTokens{value: 30 ether}();
+        vm.stopPrank();
+        vm.startPrank(address(this));
+        tokenSale.changePreSaleStatus(false);
+        tokenSale.changePublicSaleStatus(true);
+        vm.stopPrank();
+        vm.startPrank(address(0x123));
+        token.approve(address(tokenSale), 300 ether);
+        tokenSale.refund(30 ether);
         vm.stopPrank();
     }
 
