@@ -102,3 +102,36 @@ Events are emitted for key actions, providing transparency and enabling off-chai
 
 ## Inheritance from Ownable
 The contract inherits from OpenZeppelin's `Ownable` to leverage a well-tested implementation of ownership and access control.
+
+# Security Features
+
+## Reentrancy Protection
+The use of OpenZeppelin's SafeERC20 library for token transfers helps prevent reentrancy attacks, which are a common vulnerability in smart contracts that handle cryptocurrency transactions.
+
+## Fixed Caps and Contribution Limits
+By setting hard caps on the total amount that can be raised and individual contribution limits, the contract prevents excessive contributions that could lead to a monopoly of the token supply and mitigates the risk of a single entity exerting too much influence over the token.
+
+## Owner Privileges and Access Control
+The contract inherits from OpenZeppelin's Ownable contract, which provides a secure implementation of ownership and access control. This ensures that only the contract owner can activate or deactivate sale phases and distribute tokens, reducing the risk of unauthorized access.
+
+## Custom Errors
+The use of custom errors instead of traditional require statements with string messages not only saves gas but also makes the contract's behavior more predictable by clearly defining the conditions under which functions will revert.
+
+## Event Logging
+The contract emits events for significant state changes and actions, such as the activation of sale phases, token purchases, token distributions, and refunds. This transparency helps in monitoring the contract's activity and can aid in the detection of suspicious behavior.
+
+## Checks-Effects-Interactions Pattern
+The contract appears to follow the checks-effects-interactions pattern, where state changes are made before external calls (e.g., token transfers), reducing the surface for reentrancy attacks.
+
+## Refund Mechanism
+The refund function is designed to allow participants to withdraw their contributions under certain conditions. This function requires participants to return the purchased tokens, which helps prevent token dumping and price manipulation.
+
+## No External Calls in Constructors
+The contract does not make external calls in its constructor, which is a good practice to avoid attacks during deployment.
+
+## Immutable State Variables
+The use of constant state variables for caps and contribution limits ensures that these values cannot be altered after contract deployment, providing assurance to participants about the rules of the token sale.
+
+## Gas Limitations
+The contract does not have functions that could run out of gas due to unbounded loops or excessive computation, which is important for preventing denial-of-service (DoS) attacks.
+
