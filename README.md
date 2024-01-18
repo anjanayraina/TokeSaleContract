@@ -35,54 +35,32 @@ The contract inherits from OpenZeppelin's `Ownable` contract, which provides bas
 
 
 
-## Usage
+# How to run
+1.  **Install Foundry**
 
-### Build
+First, run the command below to get Foundryup, the Foundry toolchain installer:
 
-```shell
-$ forge build
+``` bash
+curl -L https://foundry.paradigm.xyz | bash
 ```
 
-### Test
+Then, in a new terminal session or after reloading your PATH, run it to get the latest forge and cast binaries:
 
-```shell
-$ forge test
+``` console
+foundryup
 ```
 
-### Format
+2. **Clone This Repo and install dependencies**
+``` 
+git clone https://github.com/anjanayraina/Assigment1
+cd Assigment1
+forge install
 
-```shell
-$ forge fmt
 ```
 
-### Gas Snapshots
+3. **Run the Tests**
 
-```shell
-$ forge snapshot
+``` 
+forge test
 ```
 
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
