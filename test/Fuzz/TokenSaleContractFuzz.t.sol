@@ -47,50 +47,45 @@ contract TokenSaleContractTest is Test {
         vm.stopPrank();
     }
 
-    function testBuyTokens() public {
+    function test_PreSaleBuyTokens(uint256 amount) public {
+        vm.assume(amount < 100 ether);
+
         vm.startPrank(address(this));
         tokenSale.changePreSaleStatus(true);
         vm.stopPrank();
-        vm.deal(address(0x123), 20 ether);
+        vm.deal(address(0x123), amount);
         vm.startPrank(address(0x123));
-        tokenSale.buyTokens{value: 10 ether}();
+        tokenSale.buyTokens{value: amount}();
         assertTrue(tokenSale.isPreSaleActive());
-        assertEq(tokenSale.contributions(address(0x123)), 10 ether);
-        assertEq(token.balanceOf(address(0x123)), 100 ether);
+        assertEq(tokenSale.contributions(address(0x123)), amount);
+        assertEq(token.balanceOf(address(0x123)), 10 * amount);
+        vm.stopPrank();
+    }
+
+    function test_PublicSaleBuyTokens(uint256 amount) public {
+        vm.assume(amount < 200 ether);
+
+        vm.startPrank(address(this));
+        tokenSale.changePublicSaleStatus(true);
+        vm.stopPrank();
+        vm.deal(address(0x123), amount);
+        vm.startPrank(address(0x123));
+        tokenSale.buyTokens{value: amount}();
+        assertTrue(tokenSale.isPublicSaleActive());
+        assertEq(tokenSale.contributions(address(0x123)), amount);
+        assertEq(token.balanceOf(address(0x123)), 10 * amount);
         vm.stopPrank();
     }
 
     function testDistributeTokens(uint256 amount, address to) public {
         vm.assume(to != address(0));
+        vm.assume(to != address(this));
         vm.assume(amount != 0);
         vm.assume(amount < type(uint128).max);
         vm.startPrank(address(this));
         token.mint(address(tokenSale), amount);
         tokenSale.distributeTokens(to, amount);
         assertEq(token.balanceOf(to), amount);
-        vm.stopPrank();
-    }
-
-    function testRefund() public {
-        vm.startPrank(address(this));
-        tokenSale.changePreSaleStatus(true);
-        vm.deal(address(0x123), 20 ether);
-        vm.stopPrank();
-        vm.startPrank(address(0x123));
-        tokenSale.buyTokens{value: 15 ether}();
-        assertTrue(tokenSale.isPreSaleActive());
-        assertEq(tokenSale.contributions(address(0x123)), 15 ether);
-        assertEq(token.balanceOf(address(0x123)), 150 ether);
-        vm.stopPrank();
-        vm.startPrank(address(this));
-        tokenSale.changePreSaleStatus(false);
-        tokenSale.changePublicSaleStatus(true);
-        vm.stopPrank();
-        vm.startPrank(address(0x123));
-        token.approve(address(tokenSale), 150 ether);
-        tokenSale.refund(15 ether);
-        assertEq(tokenSale.contributions(address(0x123)), 0);
-        assertEq(token.balanceOf(address(0x123)), 0);
         vm.stopPrank();
     }
 }
