@@ -121,7 +121,7 @@ The use of custom errors instead of traditional required statements with string 
 The contract emits events for significant state changes and actions, such as the activation of sale phases, token purchases, token distributions, and refunds. This transparency helps in monitoring the contract's activity and can aid in the detection of suspicious behavior.
 
 ## Checks-Effects-Interactions Pattern
-The contract appears to follow the checks-effects-interactions pattern, where state changes are made before external calls (e.g., token transfers), reducing the surface for reentrancy attacks.
+The contract follows the checks-effects-interactions pattern, where state changes are made before external calls (e.g., token transfers), reducing the surface for reentrancy attacks.
 
 ## Refund Mechanism
 The refund function is designed to allow participants to withdraw their contributions under certain conditions. This function requires participants to return the purchased tokens, which helps prevent token dumping and price manipulation.
