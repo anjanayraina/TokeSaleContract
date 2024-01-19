@@ -22,16 +22,7 @@ Contributions are tracked per address, and the total contributions are recorded 
 The contract owner can distribute tokens to any address using the `distributeTokens` function.
 
 ## Refunds
-Participants can request refunds through the `refund` function, which requires them to return the purchased tokens. Refunds are only processed when the pre-sale is not active, and the public sale is either active or has ended, and the participant's contribution is above the minimum threshold.
-
-## Events
-The contract emits events for state changes (`PresaleStatusChanged`, `PublicSaleStatusChanged`), token purchases (`TokensPurchased`), token distributions (`TokensDistributed`), and refunds (`RefundProcessed`).
-
-## Error Handling
-Custom errors are defined for various failure conditions, such as when a sale is not active, caps are exceeded, or balance requirements are not met.
-
-## Ownership
-The contract inherits from OpenZeppelin's `Ownable` contract, which provides basic authorization control functions, simplifying the implementation of user permissions.
+Participants can request refunds through the `refund` function, which requires them to return the purchased tokens. Refunds are only processed when the pre-sale is not active, and the public sale is either active or has ended, and the participant's contribution is below the minimum threshold.
 
 
 
@@ -91,17 +82,11 @@ The `distributeTokens` function allows the owner to distribute tokens outside of
 ## Refund Mechanism
 The `refund` function allows participants to get their ETH back if certain conditions are met. This provides a level of protection for participants and can be a trust-building feature.
 
-## Use of SafeERC20
-The contract uses OpenZeppelin's SafeERC20 library to safely interact with the ERC20 token contract, protecting against reentrancy and other token-related vulnerabilities.
-
 ## Custom Errors
 The use of custom errors instead of traditional `require` statements with string messages saves gas and provides clearer error handling.
 
 ## Event Emission
 Events are emitted for key actions, providing transparency and enabling off-chain services to monitor and react to contract activity.
-
-## Inheritance from Ownable
-The contract inherits from OpenZeppelin's `Ownable` to leverage a well-tested implementation of ownership and access control.
 
 # Security Features
 
@@ -114,17 +99,8 @@ By setting hard caps on the total amount that can be raised and individual contr
 ## Owner Privileges and Access Control
 The contract inherits from OpenZeppelin's Ownable contract, which provides a secure implementation of ownership and access control. This ensures that only the contract owner can activate or deactivate sale phases and distribute tokens, reducing the risk of unauthorized access.
 
-## Custom Errors
-The use of custom errors instead of traditional required statements with string messages not only saves gas but also makes the contract's behavior more predictable by clearly defining the conditions under which functions will revert.
-
-## Event Logging
-The contract emits events for significant state changes and actions, such as the activation of sale phases, token purchases, token distributions, and refunds. This transparency helps in monitoring the contract's activity and can aid in the detection of suspicious behavior.
-
 ## Checks-Effects-Interactions Pattern
 The contract follows the checks-effects-interactions pattern, where state changes are made before external calls (e.g., token transfers), reducing the surface for reentrancy attacks.
-
-## Refund Mechanism
-The refund function is designed to allow participants to withdraw their contributions under certain conditions. This function requires participants to return the purchased tokens, which helps prevent token dumping and price manipulation.
 
 ## No External Calls in Constructors
 The contract does not make external calls in its constructor, which is a good practice to avoid attacks during deployment.
@@ -135,3 +111,5 @@ The use of constant state variables for caps and contribution limits ensures tha
 ## Gas Limitations
 The contract does not have functions that could run out of gas due to unbounded loops or excessive computation, which is important for preventing denial-of-service (DoS) attacks.
 
+## Use of SafeERC20
+The contract uses OpenZeppelin's SafeERC20 library to safely interact with the ERC20 token contract, protecting against reentrancy and other token-related vulnerabilities.
