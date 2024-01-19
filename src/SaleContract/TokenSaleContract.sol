@@ -25,10 +25,19 @@ contract TokenSaleContract is Ownable, ReentrancyGuard {
     uint256 public constant PUBLICSALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT = 200 ether;
     uint256 totalContributions;
 
+    // This event is emitted when the presale status changes
     event PresaleStatusChanged(bool status);
+
+    // This event is emitted when the public sale status changes
     event PublicSaleStatusChanged(bool status);
+
+    // This event is emitted when tokens are purchased by a buyer
     event TokensPurchased(address indexed buyer, uint256 amount);
+
+    // This event is emitted when tokens are distributed to a recipient
     event TokensDistributed(address indexed recipient, uint256 amount);
+
+    // This event is emitted when a refund is processed by a refunder
     event RefundProcessed(address indexed refunder, uint256 amount);
 
     error SaleNotActive();
