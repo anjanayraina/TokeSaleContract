@@ -242,7 +242,7 @@ contract TokenSaleContractTest is Test {
     function test_WithdrawTokenBalance() public {
         vm.startPrank(address(this));
         uint256 balanceBefore = token.balanceOf(address(this));
-        tokenSale.withdrawTokens(token.balanceOf(address(tokenSale)));
+        tokenSale.withdrawToken(token.balanceOf(address(tokenSale)));
         assertEq(token.balanceOf(address(tokenSale)), 0);
         assertGt(token.balanceOf(address(this)), balanceBefore);
         vm.stopPrank();

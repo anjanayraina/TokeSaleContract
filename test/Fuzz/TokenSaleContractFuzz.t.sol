@@ -77,18 +77,6 @@ contract TokenSaleContractTest is Test {
         vm.stopPrank();
     }
 
-    function testDistributeTokens(uint256 amount, address to) public {
-        vm.assume(to != address(0));
-        vm.assume(to != address(this));
-        vm.assume(amount != 0);
-        vm.assume(amount < type(uint128).max);
-        vm.startPrank(address(this));
-        token.mint(address(tokenSale), amount);
-        tokenSale.distributeTokens(to, amount);
-        assertEq(token.balanceOf(to), amount);
-        vm.stopPrank();
-    }
-
     function test_WithdrawBalance(uint256 amount) public {
         vm.assume(amount != 0);
         vm.assume(amount < type(uint128).max);

@@ -74,14 +74,15 @@ contract TokenSaleContract is Ownable, ReentrancyGuard {
      */
     function buyTokens() external payable nonReentrant {
         address caller = msg.sender;
+        uint256 value = msg.value;
         if (!isPreSaleActive && !isPublicSaleActive) {
             revert SaleNotActive();
         }
         if (
             isPreSaleActive
                 && (
-                    ((totalContributions + msg.value) > PRE_SALE_CAP)
-                        || ((contributions[caller] + msg.value) > PRESALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT)
+                    ((totalContributions + value) > PRE_SALE_CAP)
+                        || ((contributions[caller] + value) > PRESALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT)
                 )
         ) {
             revert PreSaleCapExcedded();
@@ -90,15 +91,17 @@ contract TokenSaleContract is Ownable, ReentrancyGuard {
         if (
             isPublicSaleActive
                 && (
-                    ((totalContributions + msg.value) > PUBLIC_SALE_CAP)
-                        || ((contributions[caller] + msg.value) > PUBLICSALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT)
+                    ((totalContributions + value) > PUBLIC_SALE_CAP)
+                        || ((contributions[caller] + value) > PUBLICSALE_MAXIMUM_CONTRIBUTION_PER_PARTICIPANT)
                 )
         ) {
             revert PostSaleCapExcedded();
         }
-        uint256 tokensToBuy = _calculateTokens(msg.value);
-        contributions[caller] += msg.value;
-        totalContributions += msg.value;
+        uint256 tokensToBuy = _calculateToken(value);
+        unchecked {
+            contributions[caller] += value;
+            totalContributions += value;
+        }
         token.safeTransfer(caller, tokensToBuy);
         emit TokensPurchased(caller, tokensToBuy);
     }
@@ -128,18 +131,22 @@ contract TokenSaleContract is Ownable, ReentrancyGuard {
             if (contributions[caller] > PUBLICSALE_MINIMUM_CONTRIBUTION_PER_PARTICIPANT) {
                 revert BalanceHigherThanMinimmum();
             }
-            uint256 tokenAmount = _calculateTokens(amount);
+            uint256 tokenAmount = _calculateToken(amount);
             token.safeTransferFrom(caller, address(this), tokenAmount);
-            contributions[caller] -= amount;
+            unchecked {
+                contributions[caller] -= amount;
+            }
             (bool success,) = payable(caller).call{value: amount}("");
             require(success);
         } else {
             if (contributions[caller] > PRESALE_MINIMUM_CONTRIBUTION_PER_PARTICIPANT) {
                 revert BalanceHigherThanMinimmum();
             }
-            uint256 tokenAmount = _calculateTokens(amount);
+            uint256 tokenAmount = _calculateToken(amount);
             token.safeTransferFrom(caller, address(this), tokenAmount);
-            contributions[caller] -= amount;
+            unchecked {
+                contributions[caller] -= amount;
+            }
             (bool success,) = payable(caller).call{value: amount}("");
             require(success);
         }
@@ -159,7 +166,7 @@ contract TokenSaleContract is Ownable, ReentrancyGuard {
      * @dev Withdraws the token balance of the contract
      * @param amount The amount of tokens to withdraw
      */
-    function withdrawTokens(uint256 amount) external onlyOwner {
+    function withdrawToken(uint256 amount) external onlyOwner {
         token.safeTransfer(msg.sender, amount);
     }
 
@@ -170,7 +177,7 @@ contract TokenSaleContract is Ownable, ReentrancyGuard {
      * @return The number of tokens to buy.
      */
 
-    function _calculateTokens(uint256 ethAmount) internal pure returns (uint256) {
+    function _calculateToken(uint256 ethAmount) internal pure returns (uint256) {
         // Implement your token price calculation logic here
         // For simplicity, we'll assume that 1 ETH = 10 token
         return 10 * ethAmount;
