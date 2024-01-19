@@ -50,7 +50,7 @@ contract TokenSaleContract is Ownable, ReentrancyGuard {
     mapping(address => uint256) public contributions;
 
     /**
-     * @dev Sets the parameters for the token sale contract
+     * @notice Sets the parameters for the token sale contract
      * @param tokenAddress The address of the token contract.
      * @param initialOwner The address of the owner of the contract
      */
@@ -61,7 +61,7 @@ contract TokenSaleContract is Ownable, ReentrancyGuard {
     // External functions
 
     /**
-     * @dev Changes the status of the presale
+     * @notice Changes the status of the presale
      * @param status The new status of the presale
      */
     function changePreSaleStatus(bool status) external onlyOwner {
@@ -69,7 +69,7 @@ contract TokenSaleContract is Ownable, ReentrancyGuard {
         emit PresaleStatusChanged(status);
     }
     /**
-     * @dev Changes the status of the public sale
+     * @notice Changes the status of the public sale
      * @param status The new status of the public sale
      */
 
@@ -79,7 +79,7 @@ contract TokenSaleContract is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Buys tokens in the presale or public sale.
+     * @notice Buys tokens in the presale or public sale.
      */
     function buyTokens() external payable nonReentrant {
         address caller = msg.sender;
@@ -116,7 +116,7 @@ contract TokenSaleContract is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Distributes tokens to a specified address.
+     * @notice Distributes tokens to a specified address.
      * @param to The address to distribute tokens to.
      * @param amount The number of tokens to distribute.
      */
@@ -126,7 +126,7 @@ contract TokenSaleContract is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Refunds eth to the caller.
+     * @notice Refunds eth to the caller.
      * @param amount The amount of eth to be refunded .
      */
     function refund(uint256 amount) external nonReentrant {
@@ -151,18 +151,20 @@ contract TokenSaleContract is Ownable, ReentrancyGuard {
             if (contributions[caller] > PRESALE_MINIMUM_CONTRIBUTION_PER_PARTICIPANT) {
                 revert BalanceHigherThanMinimmum();
             }
+
             uint256 tokenAmount = _calculateToken(amount);
             token.safeTransferFrom(caller, address(this), tokenAmount);
             unchecked {
                 contributions[caller] -= amount;
             }
+        
             (bool success,) = payable(caller).call{value: amount}("");
             require(success);
         }
         emit RefundProcessed(caller, amount);
     }
     /**
-     * @dev Withdraws the eth balance of the contract
+     * @notice Withdraws the eth balance of the contract
      * @param amount The amount of eth to withdraw
      */
 
@@ -172,7 +174,7 @@ contract TokenSaleContract is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Withdraws the token balance of the contract
+     * @notice Withdraws the token balance of the contract
      * @param amount The amount of tokens to withdraw
      */
     function withdrawToken(uint256 amount) external onlyOwner {
@@ -181,7 +183,7 @@ contract TokenSaleContract is Ownable, ReentrancyGuard {
 
     // Internal functions
     /**
-     * @dev Calculates the number of tokens to buy based on the contributed Ether.
+     * @notice Calculates the number of tokens to buy based on the contributed Ether.
      * @param ethAmount The amount of Ether contributed.
      * @return The number of tokens to buy.
      */
