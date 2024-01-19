@@ -157,7 +157,7 @@ contract TokenSaleContract is Ownable, ReentrancyGuard {
             unchecked {
                 contributions[caller] -= amount;
             }
-        
+
             (bool success,) = payable(caller).call{value: amount}("");
             require(success);
         }
