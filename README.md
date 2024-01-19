@@ -22,7 +22,7 @@ Contributions are tracked per address, and the total contributions are recorded 
 The contract owner can distribute tokens to any address using the `distributeTokens` function.
 
 ## Refunds
-Participants can request refunds through the `refund` function, which requires them to return the purchased tokens. Refunds are only processed when the pre-sale is not active, and the public sale is either active or has ended, and the participant's contribution is above the minimum threshold.
+Participants can request refunds through the `refund` function, which requires them to return the purchased tokens. Refunds are only processed when the pre-sale is not active, and the public sale is either active or has ended, and the participant's contribution is below the minimum threshold.
 
 
 
